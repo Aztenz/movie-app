@@ -6,3 +6,4 @@ mongoose.connect('mongodb://localhost/movieDB', {
 });
 
 module.exports = mongoose.connection;
+
