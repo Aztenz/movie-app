@@ -40,7 +40,7 @@ const movieSchema = new mongoose.Schema({
   cast: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Actor',
-    required: true,
+    required: false,
   }],
   // Embedded trailers within the movie document
   trailers: [

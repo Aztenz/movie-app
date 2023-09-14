@@ -20,6 +20,11 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
+// Import and use middlewares
+const loggerMiddleware = require('./middleware/logger');
+
+app.use(loggerMiddleware);
+
 // Import and use the routes
 const castRouter = require('./routes/castRouter');
 const userCommentsRouter = require('./routes/commentRouter');

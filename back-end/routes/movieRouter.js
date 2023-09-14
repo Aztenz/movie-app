@@ -36,6 +36,7 @@ router.post('/', async (req, res) => {
     const savedMovie = await newMovie.save();
     res.status(201).json(savedMovie);
   } catch (error) {
+    console.log(error.message);
     res.status(400).json({ error: 'Could not create a new movie' });
   }
 });
