@@ -1,56 +1,46 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const db = require('./db');
-const Movie = require('./models/movie');
-
+const cors = require('cors');
 const app = express();
+
+// Middleware
 app.use(bodyParser.json());
+app.use(cors());
 
 // Connect to MongoDB
+mongoose.connect('mongodb://0.0.0.0:27017/movie_database', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
-// Define routes for your endpoints
-app.get('/movies', async (req, res) => {
-  try {
-    const movies = await Movie.find();
-    res.json(movies);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+// Import and use the routes
+const castRouter = require('./routes/castRouter');
+const userCommentsRouter = require('./routes/commentRouter');
+const userFavoritesRouter = require('./routes/favouriteRouter');
+const filterRouter = require('./routes/filterRouter');
+const imageRouter = require('./routes/imageRouter');
+const movieRouter = require('./routes/movieRouter');
+const trailerRouter = require('./routes/trailerRouter');
+const userRouter = require('./routes/userRouter');
 
-app.get('/movies/:genre', async (req, res) => {
-  const genre = req.params.genre;
-  try {
-    const moviesByGenre = await Movie.find({ genre });
-    res.json(moviesByGenre);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+app.use("/api/actors", castRouter);
+app.use("/api/movies/:movie_id/comments", userCommentsRouter);
+app.use("/api/users/:user_id/favorites", userFavoritesRouter);
+app.use("/api/search/movies", filterRouter);
+app.use("/api", imageRouter);
+app.use("/api/movies", movieRouter);
+app.use("/api/movies/:movie_id/trailers", trailerRouter);
+app.use("/api", userRouter);
 
-app.post('/movies/:movieId/reviews', async (req, res) => {
-  const movieId = req.params.movieId;
-  const { text, rating } = req.body;
-
-  try {
-    const movie = await Movie.findById(movieId);
-    if (!movie) {
-      return res.status(404).json({ error: 'Movie not found' });
-    }
-
-    movie.reviews.push({ text, rating });
-    await movie.save();
-    res.json(movie);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Start the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
